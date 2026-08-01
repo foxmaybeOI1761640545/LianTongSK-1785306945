@@ -58,8 +58,8 @@ function selectRecord(record) {
 
 function selectKpi(kpi) {
   manualInteraction()
-  if (['anomaly', 'rate'].includes(kpi.id)) highlight('anomaly')
-  else if (kpi.id === 'difference') highlight('settlement')
+  if (kpi.id === 'crossPeriod') highlight('anomaly')
+  else if (kpi.id === 'concentration') highlight('ranking')
   else if (kpi.id === 'traffic') highlight('flow')
   else highlight('kpis')
 }
@@ -85,55 +85,56 @@ function selectKpi(kpi) {
     />
 
     <div v-if="loading && !dashboard" class="loading-state" aria-live="polite">
-      <span class="loading-ring"></span><strong>正在装载统一话单数据契约</strong><small>MockDataAdapter · Seed 20260729</small>
+      <span class="loading-ring"></span><strong>正在装载脱敏聚合数据</strong><small>StaticSampleDataAdapter · v2026.08.01</small>
     </div>
     <div v-else-if="error && !dashboard" class="error-state" role="alert">
       <strong>数据装载失败</strong><span>{{ error }}</span><button type="button" @click="reload">重新加载</button>
     </div>
 
     <main v-if="dashboard" class="dashboard-content" :class="{ 'is-refreshing': loading }">
-      <section class="kpi-grid" :class="{ 'tour-highlight': activeStep === 'kpis' }" aria-label="核心稽核指标" data-testid="kpi-grid">
+      <section class="kpi-grid" :class="{ 'tour-highlight': activeStep === 'kpis' }" aria-label="核心洞察指标" data-testid="kpi-grid">
         <KpiCard v-for="(kpi, index) in dashboard.kpis" :key="kpi.id" :kpi="kpi" :index="index + 1" :active="activeStep === 'kpis'" @select="selectKpi" />
       </section>
 
       <section class="analytics-grid">
         <div class="left-column">
-          <PanelFrame title="话单总量趋势" eyebrow="CDR VOLUME & TRAFFIC">
+          <PanelFrame title="话单与流量趋势" eyebrow="CDR VOLUME & TRAFFIC">
             <TrafficTrendChart :data="dashboard.trend" />
           </PanelFrame>
-          <PanelFrame title="异常类型分布" eyebrow="ANOMALY TAXONOMY" :active="activeStep === 'anomaly'">
+          <PanelFrame title="数据质量关注信号" eyebrow="DATA QUALITY SIGNALS" :active="activeStep === 'anomaly'">
             <AnomalyDistribution :data="dashboard.anomalyDistribution" />
           </PanelFrame>
         </div>
 
         <div class="center-column">
-          <PanelFrame title="粤港漫游稽核态势" eyebrow="ROAMING FLOW TOPOLOGY" :active="activeStep === 'flow'">
+          <PanelFrame title="粤港漫游样本流向" eyebrow="ROAMING FLOW TOPOLOGY" :active="activeStep === 'flow'">
             <template #header><span class="panel-badge">DCC / GGSN</span></template>
             <RoamingFlowMap :flows="dashboard.flows" :selected="filters.direction" :active="activeStep === 'flow'" @select="changeDirection" />
           </PanelFrame>
-          <PanelFrame title="异常率趋势" eyebrow="AUDIT EXCEPTION RATE" :active="activeStep === 'anomaly'">
-            <template #header><span class="threshold-note">关注阈值 3.0%</span></template>
+          <PanelFrame title="跨期记录率趋势" eyebrow="OUT-OF-PERIOD RATE" :active="activeStep === 'anomaly'">
+            <template #header><span class="threshold-note">理想值 0%</span></template>
             <AnomalyTrendChart :data="dashboard.trend" />
           </PanelFrame>
         </div>
 
         <div class="right-column">
-          <PanelFrame title="高价值风险话单 TOP 10" eyebrow="HIGH-VALUE RISK RANKING" :active="activeStep === 'ranking'">
-            <template #header><span class="panel-badge danger">风险评分</span></template>
+          <PanelFrame title="高价值用户画像 TOP 10" eyebrow="HIGH-VALUE USER RANKING" :active="activeStep === 'ranking'">
+            <template #header><span class="panel-badge danger">流量指数</span></template>
             <HighValueRanking :records="dashboard.highValueRecords" @select="selectRecord" />
           </PanelFrame>
-          <PanelFrame title="最新异常话单" eyebrow="LIVE EXCEPTION QUEUE" compact>
-            <template #header><span class="queue-count">{{ dashboard.recentAnomalies.length }} 条待关注</span></template>
+          <PanelFrame title="最近活跃高价值样本" eyebrow="RECENT HIGH-VALUE SAMPLES" compact>
+            <template #header><span class="queue-count">{{ dashboard.recentAnomalies.length }} 个脱敏样本</span></template>
             <RecentAnomalyList :records="dashboard.recentAnomalies" @select="selectRecord" />
           </PanelFrame>
         </div>
       </section>
 
       <section class="bottom-grid">
-        <PanelFrame title="结算价值洞察" eyebrow="SETTLEMENT VALUE" :active="activeStep === 'settlement'" compact>
-          <SettlementPanel :summary="dashboard.summary" />
+        <PanelFrame title="结算情景估算" eyebrow="SETTLEMENT SCENARIO" :active="activeStep === 'settlement'" compact>
+          <template #header><span class="panel-badge">情景假设</span></template>
+          <SettlementPanel :summary="dashboard.summary" :scenario="dashboard.settlement" />
         </PanelFrame>
-        <PanelFrame title="从稽核到经营" eyebrow="VALUE CONVERSION" compact>
+        <PanelFrame title="从数据到经营" eyebrow="VALUE CONVERSION" compact>
           <ValuePanel :value="dashboard.value" />
         </PanelFrame>
         <PanelFrame title="数据链路健康" eyebrow="PIPELINE HEALTH" :active="activeStep === 'pipeline'" compact>
@@ -143,8 +144,8 @@ function selectKpi(kpi) {
     </main>
 
     <footer class="dashboard-footer">
-      <span>指标口径：流量统一为 bytes · 漫游方向由归属地 + 实际上网地判断 · GGSN 仅作交叉校验</span>
-      <span>演示数据，不含真实用户信息</span>
+      <span>指标口径：流量统一为 bytes · 文件标称周期 2026-07 · 画像为可重叠多标签</span>
+      <span>真实样本的脱敏静态聚合 · 金额仅为情景估算</span>
     </footer>
 
     <div v-if="tour.state.value !== 'idle'" class="tour-status" aria-live="polite">
