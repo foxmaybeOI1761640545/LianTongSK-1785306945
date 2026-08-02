@@ -9,7 +9,7 @@ defineProps({
   tourTotal: { type: Number, default: 7 },
 })
 
-const emit = defineEmits(['range-change', 'direction-change', 'tour-start', 'tour-pause', 'tour-resume', 'tour-restart'])
+const emit = defineEmits(['range-change', 'segment-change', 'tour-start', 'tour-pause', 'tour-resume', 'tour-restart'])
 const now = ref(new Date())
 let clockTimer = null
 
@@ -35,11 +35,11 @@ const timeText = computed(() => new Intl.DateTimeFormat('zh-CN', {
         <span></span><span></span><span></span>
       </div>
       <div>
-        <div class="brand-kicker">LIANTONG · ROAMING DATA INSIGHT COMMAND CENTER</div>
-        <h1>粤港一卡双号漫游数据洞察驾驶舱</h1>
+        <div class="brand-kicker">LIANTONG · USER EXPERIENCE & VALUE OPERATIONS</div>
+        <h1>粤港一卡双号用户体验与价值运营驾驶舱</h1>
         <div class="brand-subline">
-          <p>从真实数据到价值经营</p>
-          <span class="inline-source"><i></i>真实样本聚合</span>
+          <p>基于真实漫游行为，识别使用体验信号、重点客群和运营机会</p>
+          <span class="inline-source"><i></i>行为洞察</span>
         </div>
       </div>
     </div>
@@ -55,11 +55,13 @@ const timeText = computed(() => new Intl.DateTimeFormat('zh-CN', {
         </select>
       </label>
       <label class="control-field">
-        <span>漫游方向</span>
-        <select :value="filters.direction" aria-label="漫游方向" data-testid="direction-filter" @change="emit('direction-change', $event.target.value)">
-          <option value="ALL">全部方向</option>
-          <option value="GD_TO_HK">广东 → 香港</option>
-          <option value="HK_TO_GD">香港 → 广东</option>
+        <span>客群聚焦</span>
+        <select :value="filters.segment" aria-label="客群聚焦" data-testid="segment-filter" @change="emit('segment-change', $event.target.value)">
+          <option value="ALL">全部客群</option>
+          <option value="HIGH_USAGE">高用量重点用户</option>
+          <option value="RECALL">低活跃召回候选</option>
+          <option value="GROWTH">价值提升候选</option>
+          <option value="ENTERPRISE">企业场景候选</option>
         </select>
       </label>
 
@@ -82,12 +84,12 @@ const timeText = computed(() => new Intl.DateTimeFormat('zh-CN', {
     </div>
 
     <div class="source-strip">
-      <span class="source-pill"><i></i>数据源：{{ source?.label ?? '数据加载中' }}</span>
-      <span>{{ source?.message ?? '正在初始化稽核数据契约' }}</span>
+      <span class="source-pill"><i></i>{{ source?.label ?? '数据加载中' }}</span>
+      <span>{{ source?.message ?? '正在初始化用户行为数据' }}</span>
       <span class="source-divider"></span>
-      <span>口径版本：{{ source?.version ?? '—' }}</span>
+      <span>{{ source?.scope ?? '正在确认样本覆盖范围' }}</span>
       <span class="source-divider"></span>
-      <span>业务快照：{{ source?.snapshotAt ?? '—' }}</span>
+      <strong>{{ source?.disclaimer ?? '行为标签需结合业务数据复核' }}</strong>
     </div>
   </header>
 </template>

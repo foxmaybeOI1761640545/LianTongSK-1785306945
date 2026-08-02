@@ -1,9 +1,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { dashboardDataAdapter } from '../services/dashboardDataAdapter.js'
-import { DIRECTIONS } from '../utils/metrics.js'
+import { SEGMENTS } from '../utils/metrics.js'
 
 export function useDashboardData() {
-  const filters = ref({ range: 'all', direction: DIRECTIONS.ALL })
+  const filters = ref({ range: 'all', segment: SEGMENTS.ALL })
   const dashboard = ref(null)
   const loading = ref(true)
   const error = ref('')
@@ -27,8 +27,8 @@ export function useDashboardData() {
     filters.value = { ...filters.value, range }
   }
 
-  function setDirection(direction) {
-    filters.value = { ...filters.value, direction }
+  function setSegment(segment) {
+    filters.value = { ...filters.value, segment }
   }
 
   watch(filters, load, { deep: true })
@@ -41,7 +41,7 @@ export function useDashboardData() {
     error,
     hasData: computed(() => Boolean(dashboard.value)),
     setRange,
-    setDirection,
+    setSegment,
     reload: load,
   }
 }

@@ -22,11 +22,12 @@ const directionLabel = (direction) => direction === 'GD_TO_HK' ? '粤 → 港' :
         <span><strong>{{ record.phone }}</strong><em>{{ directionLabel(record.direction) }}</em></span>
         <small>{{ formatBytes(record.totalBytes, 1) }} · {{ record.activeDays }} 个活跃日</small>
       </span>
-      <span class="risk-score">
-        <b>{{ record.riskScore }}</b>
-        <i><span :style="{ width: `${record.riskScore}%` }"></span></i>
+      <span class="contribution-score">
+        <b>{{ (record.trafficShare * 100).toFixed(2) }}%</b>
+        <small>流量贡献</small>
+        <i><span :style="{ width: `${Math.min(record.trafficShare * 1000, 100)}%` }"></span></i>
       </span>
     </button>
-    <div v-if="!records.length" class="empty-state">当前筛选方向没有用户样本</div>
+    <div v-if="!records.length" class="empty-state">当前周期暂无可发布的重点用户明细</div>
   </div>
 </template>

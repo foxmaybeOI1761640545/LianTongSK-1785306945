@@ -4,18 +4,10 @@ import { formatBytes } from '../utils/traffic.js'
 
 const props = defineProps({
   flows: { type: Array, default: () => [] },
-  selected: { type: String, default: 'ALL' },
   active: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['select'])
-
 const gdToHk = computed(() => props.flows.find((flow) => flow.direction === 'GD_TO_HK') ?? {})
-const hkToGd = computed(() => props.flows.find((flow) => flow.direction === 'HK_TO_GD') ?? {})
-
-function toggleDirection(direction) {
-  emit('select', props.selected === direction ? 'ALL' : direction)
-}
 </script>
 
 <template>
@@ -23,10 +15,10 @@ function toggleDirection(direction) {
     <div class="flow-map-grid" aria-hidden="true"></div>
     <div class="map-caption">
       <span class="live-dot"></span>
-      <span>样本漫游流向 · 仅支持广东侧用户访问香港网络</span>
+      <span>样本覆盖 · 广东侧样本用户访问香港网络</span>
     </div>
 
-    <svg class="flow-svg" viewBox="0 0 760 330" role="img" aria-label="广东侧用户访问香港网络的样本流量示意">
+    <svg class="flow-svg" viewBox="0 0 760 330" role="img" aria-label="广东侧样本用户访问香港网络的使用场景示意">
       <defs>
         <linearGradient id="regionGd" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#1d5d97" stop-opacity=".72" />
@@ -63,37 +55,27 @@ function toggleDirection(direction) {
 
       <g transform="translate(410 142)">
         <rect x="-67" y="-20" width="134" height="39" rx="19" class="route-label-bg" />
-        <text text-anchor="middle" y="5" class="route-label">脱敏话单聚合分析</text>
+        <text text-anchor="middle" y="5" class="route-label">跨境使用行为聚合</text>
       </g>
     </svg>
 
     <div class="flow-direction-cards">
-      <button
-        type="button"
-        :class="['direction-card', 'cyan', { selected: selected === 'GD_TO_HK' }]"
-        data-testid="flow-gd-hk"
-        @click="toggleDirection('GD_TO_HK')"
-      >
-        <span class="direction-title">广东 <b>→</b> 香港</span>
+      <article class="direction-card cyan coverage-card" data-testid="flow-gd-hk">
+        <span class="direction-title">广东侧样本用户 <b>→</b> 香港网络</span>
         <strong>{{ formatBytes(gdToHk.totalBytes) }}</strong>
         <span>{{ Number(gdToHk.completedCount ?? 0).toLocaleString('zh-CN') }} 条 · {{ Number(gdToHk.userCount ?? 0).toLocaleString('zh-CN') }} 用户</span>
-      </button>
-      <button
-        type="button"
-        :class="['direction-card', 'violet', { selected: selected === 'HK_TO_GD' }]"
-        data-testid="flow-hk-gd"
-        @click="toggleDirection('HK_TO_GD')"
-      >
-        <span class="direction-title">香港 <b>→</b> 广东</span>
-        <strong>{{ formatBytes(hkToGd.totalBytes) }}</strong>
-        <span>{{ Number(hkToGd.completedCount ?? 0).toLocaleString('zh-CN') }} 条 · 本样本无反向记录</span>
-      </button>
+      </article>
+      <article class="direction-card boundary-card" data-testid="sample-boundary-card">
+        <span class="direction-title">样本适用边界</span>
+        <strong>未提供对侧样本</strong>
+        <span>{{ gdToHk.coverageNote ?? '不将缺失数据表达为业务量为零' }}</span>
+      </article>
     </div>
 
     <div class="map-legend">
-      <span><i class="legend-cyan"></i>内地用户归属</span>
+      <span><i class="legend-cyan"></i>广东侧样本用户</span>
       <span><i class="legend-violet"></i>香港访问网络</span>
-      <span><i class="legend-amber"></i>静态脱敏聚合</span>
+      <span><i class="legend-amber"></i>单侧静态样本</span>
     </div>
   </div>
 </template>

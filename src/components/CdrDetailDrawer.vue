@@ -33,9 +33,9 @@ onBeforeUnmount(() => globalThis.removeEventListener('keydown', handleKeydown))
           </header>
 
           <div class="drawer-scroll">
-            <div class="risk-banner">
-              <div class="risk-gauge"><strong>{{ record.riskScore }}</strong><span>流量指数</span></div>
-              <div><span class="risk-type">{{ record.anomalyType }}</span><h3>{{ record.rule }}</h3><p>{{ record.phone }} · {{ record.subscriberTier }} · {{ record.status }}</p></div>
+            <div class="focus-banner">
+              <div class="focus-gauge"><strong>{{ trafficShare }}</strong><span>流量贡献</span></div>
+              <div><span class="focus-type">{{ record.focusType }}</span><h3>{{ record.rule }}</h3><p>{{ record.phone }} · {{ record.subscriberTier }} · {{ record.status }}</p></div>
             </div>
 
             <section class="evidence-section">
@@ -55,7 +55,7 @@ onBeforeUnmount(() => globalThis.removeEventListener('keydown', handleKeydown))
                   <header><span>行为特征</span><em>规则推导</em></header>
                   <dl>
                     <div><dt>当前周期流量贡献</dt><dd>{{ trafficShare }}</dd></div>
-                    <div><dt>工作日流量占比</dt><dd>{{ weekdayShare }}</dd></div>
+                    <div><dt>工作日使用占比</dt><dd>{{ weekdayShare }}</dd></div>
                     <div><dt>用户归属 / 访问地</dt><dd>{{ record.homeRegion }} / {{ record.visitedRegion }}</dd></div>
                     <div><dt>标签状态</dt><dd class="danger">{{ record.status }}</dd></div>
                   </dl>
@@ -64,17 +64,17 @@ onBeforeUnmount(() => globalThis.removeEventListener('keydown', handleKeydown))
             </section>
 
             <section class="reasoning-section">
-              <div class="section-heading"><span>02</span><div><h3>画像规则说明</h3><p>从真实聚合指标到经营建议</p></div></div>
+              <div class="section-heading"><span>02</span><div><h3>行为信号说明</h3><p>从真实聚合指标到体验改善与经营建议</p></div></div>
               <div class="reasoning-flow">
-                <article><i>!</i><span>识别依据</span><p>{{ record.cause }}</p></article>
+                <article><i>数</i><span>识别依据</span><p>{{ record.cause }}</p></article>
                 <b>→</b>
-                <article><i>¥</i><span>业务含义</span><p>{{ record.impact }}</p></article>
+                <article><i>值</i><span>体验与业务含义</span><p>{{ record.impact }}</p></article>
                 <b>→</b>
                 <article class="recommended"><i>✓</i><span>建议动作</span><p>{{ record.suggestion }}</p></article>
               </div>
             </section>
 
-            <div class="drawer-note">本抽屉展示真实样本的脱敏用户聚合；价值分和经营建议属于规则推导，不代表生产模型或用户身份认定。</div>
+            <div class="drawer-note">本抽屉展示真实样本的脱敏用户聚合；行为标签和经营建议属于规则推导，不代表用户身份、收入或满意度认定。</div>
           </div>
         </aside>
       </div>

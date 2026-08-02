@@ -4,19 +4,19 @@ import DashboardHeader from './components/DashboardHeader.vue'
 import KpiCard from './components/KpiCard.vue'
 import PanelFrame from './components/PanelFrame.vue'
 import TrafficTrendChart from './components/TrafficTrendChart.vue'
-import AnomalyTrendChart from './components/AnomalyTrendChart.vue'
-import AnomalyDistribution from './components/AnomalyDistribution.vue'
+import ExperienceSignals from './components/ExperienceSignals.vue'
 import RoamingFlowMap from './components/RoamingFlowMap.vue'
+import OpportunityPanel from './components/OpportunityPanel.vue'
 import HighValueRanking from './components/HighValueRanking.vue'
-import RecentAnomalyList from './components/RecentAnomalyList.vue'
-import SettlementPanel from './components/SettlementPanel.vue'
+import RecentFocusList from './components/RecentFocusList.vue'
+import ExperiencePathPanel from './components/ExperiencePathPanel.vue'
 import PipelineStatus from './components/PipelineStatus.vue'
 import ValuePanel from './components/ValuePanel.vue'
 import CdrDetailDrawer from './components/CdrDetailDrawer.vue'
 import { useDashboardData } from './composables/useDashboardData.js'
 import { useDemoTour } from './composables/useDemoTour.js'
 
-const { filters, dashboard, loading, error, setRange, setDirection, reload } = useDashboardData()
+const { filters, dashboard, loading, error, setRange, setSegment, reload } = useDashboardData()
 const selectedRecord = ref(null)
 const manualActive = ref('')
 let manualTimer = null
@@ -45,9 +45,9 @@ function changeRange(value) {
   setRange(value)
 }
 
-function changeDirection(value) {
+function changeSegment(value) {
   manualInteraction()
-  setDirection(value)
+  setSegment(value)
 }
 
 function selectRecord(record) {
@@ -58,7 +58,7 @@ function selectRecord(record) {
 
 function selectKpi(kpi) {
   manualInteraction()
-  if (kpi.id === 'crossPeriod') highlight('anomaly')
+  if (kpi.id === 'recall' || kpi.id === 'averageTraffic') highlight('experience')
   else if (kpi.id === 'concentration') highlight('ranking')
   else if (kpi.id === 'traffic') highlight('flow')
   else highlight('kpis')
@@ -77,7 +77,7 @@ function selectKpi(kpi) {
       :tour-step="tour.stepIndex.value"
       :tour-total="tour.totalSteps"
       @range-change="changeRange"
-      @direction-change="changeDirection"
+      @segment-change="changeSegment"
       @tour-start="tour.start"
       @tour-pause="tour.pause"
       @tour-resume="tour.resume"
@@ -98,54 +98,55 @@ function selectKpi(kpi) {
 
       <section class="analytics-grid">
         <div class="left-column">
-          <PanelFrame title="话单与流量趋势" eyebrow="CDR VOLUME & TRAFFIC">
+          <PanelFrame title="活跃用户与漫游流量趋势" eyebrow="ACTIVE USERS & ROAMING TRAFFIC">
             <TrafficTrendChart :data="dashboard.trend" />
           </PanelFrame>
-          <PanelFrame title="数据质量关注信号" eyebrow="DATA QUALITY SIGNALS" :active="activeStep === 'anomaly'">
-            <AnomalyDistribution :data="dashboard.anomalyDistribution" />
+          <PanelFrame title="用户体验行为信号" eyebrow="EXPERIENCE BEHAVIOR SIGNALS" :active="activeStep === 'experience'">
+            <template #header><span class="panel-badge">月度多标签</span></template>
+            <ExperienceSignals :data="dashboard.experienceSignals" :selected="filters.segment" />
           </PanelFrame>
         </div>
 
         <div class="center-column">
-          <PanelFrame title="粤港漫游样本流向" eyebrow="ROAMING FLOW TOPOLOGY" :active="activeStep === 'flow'">
-            <template #header><span class="panel-badge">DCC / GGSN</span></template>
-            <RoamingFlowMap :flows="dashboard.flows" :selected="filters.direction" :active="activeStep === 'flow'" @select="changeDirection" />
+          <PanelFrame title="样本覆盖与跨境使用场景" eyebrow="SAMPLE COVERAGE & USAGE SCENARIO" :active="activeStep === 'flow'">
+            <template #header><span class="panel-badge">真实样本 / 单侧覆盖</span></template>
+            <RoamingFlowMap :flows="dashboard.flows" :active="activeStep === 'flow'" />
           </PanelFrame>
-          <PanelFrame title="跨期记录率趋势" eyebrow="OUT-OF-PERIOD RATE" :active="activeStep === 'anomaly'">
-            <template #header><span class="threshold-note">理想值 0%</span></template>
-            <AnomalyTrendChart :data="dashboard.trend" />
+          <PanelFrame title="重点客群与运营机会" eyebrow="AUDIENCE OPPORTUNITIES" :active="activeStep === 'value'">
+            <template #header><span class="threshold-note">候选群体可重叠</span></template>
+            <OpportunityPanel :value="dashboard.value" />
           </PanelFrame>
         </div>
 
         <div class="right-column">
-          <PanelFrame title="高价值用户画像 TOP 10" eyebrow="HIGH-VALUE USER RANKING" :active="activeStep === 'ranking'">
-            <template #header><span class="panel-badge danger">流量指数</span></template>
+          <PanelFrame title="高用量重点关怀用户 TOP 10" eyebrow="HIGH-USAGE CUSTOMER FOCUS" :active="activeStep === 'ranking'">
+            <template #header><span class="panel-badge">流量贡献</span></template>
             <HighValueRanking :records="dashboard.highValueRecords" @select="selectRecord" />
           </PanelFrame>
-          <PanelFrame title="最近活跃高价值样本" eyebrow="RECENT HIGH-VALUE SAMPLES" compact>
-            <template #header><span class="queue-count">{{ dashboard.recentAnomalies.length }} 个脱敏样本</span></template>
-            <RecentAnomalyList :records="dashboard.recentAnomalies" @select="selectRecord" />
+          <PanelFrame title="近期重点关怀用户" eyebrow="RECENT CUSTOMER FOCUS" compact>
+            <template #header><span class="queue-count">{{ dashboard.recentFocusUsers.length }} 个脱敏样本</span></template>
+            <RecentFocusList :records="dashboard.recentFocusUsers" @select="selectRecord" />
           </PanelFrame>
         </div>
       </section>
 
       <section class="bottom-grid">
-        <PanelFrame title="结算情景估算" eyebrow="SETTLEMENT SCENARIO" :active="activeStep === 'settlement'" compact>
-          <template #header><span class="panel-badge">情景假设</span></template>
-          <SettlementPanel :summary="dashboard.summary" :scenario="dashboard.settlement" />
+        <PanelFrame title="用户体验改善路径" eyebrow="EXPERIENCE IMPROVEMENT" :active="activeStep === 'experience'" compact>
+          <template #header><span class="panel-badge">从行为信号到服务动作</span></template>
+          <ExperiencePathPanel :value="dashboard.value" />
         </PanelFrame>
-        <PanelFrame title="从数据到经营" eyebrow="VALUE CONVERSION" compact>
+        <PanelFrame title="公司价值转化" eyebrow="COMPANY VALUE CONVERSION" :active="activeStep === 'value'" compact>
           <ValuePanel :value="dashboard.value" />
         </PanelFrame>
-        <PanelFrame title="数据链路健康" eyebrow="PIPELINE HEALTH" :active="activeStep === 'pipeline'" compact>
+        <PanelFrame title="数据可信度与适用边界" eyebrow="DATA TRUST & SCOPE" :active="activeStep === 'pipeline'" compact>
           <PipelineStatus :items="dashboard.pipeline" />
         </PanelFrame>
       </section>
     </main>
 
     <footer class="dashboard-footer">
-      <span>指标口径：流量统一为 bytes · 文件标称周期 2026-07 · 画像为可重叠多标签</span>
-      <span>真实样本的脱敏静态聚合 · 金额仅为情景估算</span>
+      <span>指标口径：流量统一为 bytes · 文件标称周期 2026-07 · 客群为可重叠行为标签</span>
+      <span>真实静态样本 · 不进行双边结算稽核 · 运营效果需后续业务数据验证</span>
     </footer>
 
     <div v-if="tour.state.value !== 'idle'" class="tour-status" aria-live="polite">

@@ -1,6 +1,6 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 
-const STEPS = ['kpis', 'flow', 'anomaly', 'ranking', 'detail', 'settlement', 'pipeline']
+const STEPS = ['kpis', 'flow', 'experience', 'ranking', 'detail', 'value', 'pipeline']
 
 export function useDemoTour({ onStep, interval = 3600 } = {}) {
   const state = ref('idle')

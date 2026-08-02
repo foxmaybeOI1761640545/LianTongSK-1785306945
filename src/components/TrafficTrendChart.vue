@@ -16,7 +16,7 @@ const option = computed(() => ({
     textStyle: { color: '#edf8ff' },
     formatter(params) {
       const row = props.data[params[0].dataIndex]
-      return `<b>${row.date}</b><br/>稽核话单：${row.completedCount.toLocaleString('zh-CN')}<br/>漫游流量：${formatBytes(row.totalBytes)}`
+      return `<b>${row.date}</b><br/>活跃用户：${row.activeUsers.toLocaleString('zh-CN')}人<br/>漫游流量：${formatBytes(row.totalBytes)}<br/><span style="color:#6f91aa">静态样本记录：${row.recordCount.toLocaleString('zh-CN')}条</span>`
     },
   },
   xAxis: {
@@ -31,16 +31,16 @@ const option = computed(() => ({
     {
       type: 'value',
       splitNumber: 3,
-      axisLabel: { color: '#6f91aa', fontSize: 10, formatter: (value) => `${Math.round(value / 1000)}k` },
+      axisLabel: { color: '#6f91aa', fontSize: 10, formatter: (value) => `${Math.round(value)}人` },
       splitLine: { lineStyle: { color: 'rgba(80, 139, 177, .12)' } },
     },
     { type: 'value', show: false },
   ],
   series: [
     {
-      name: '话单量',
+      name: '活跃用户',
       type: 'bar',
-      data: props.data.map((item) => item.completedCount),
+      data: props.data.map((item) => item.activeUsers),
       barMaxWidth: 11,
       itemStyle: {
         color: {
@@ -66,4 +66,4 @@ const option = computed(() => ({
 useEChart(chartElement, option)
 </script>
 
-<template><div ref="chartElement" class="chart-canvas" data-testid="traffic-chart" aria-label="话单总量与流量趋势图"></div></template>
+<template><div ref="chartElement" class="chart-canvas" data-testid="traffic-chart" aria-label="活跃用户与漫游流量趋势图"></div></template>
