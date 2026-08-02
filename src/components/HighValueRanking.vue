@@ -14,7 +14,7 @@ const directionLabel = (direction) => direction === 'GD_TO_HK' ? '粤 → 港' :
       :key="record.id"
       type="button"
       class="ranking-row"
-      :aria-label="`查看 ${record.id} 异常详情`"
+      :aria-label="`查看 ${record.phone} 用户画像`"
       @click="$emit('select', record)"
     >
       <span :class="['rank-number', { top: index < 3 }]">{{ String(index + 1).padStart(2, '0') }}</span>
